@@ -1,0 +1,34 @@
+import pandas as pd
+import pytest
+
+from portfolio import default_portfolio, export_csv, import_csv, portfolio_snapshot, validate_portfolio
+
+def test_default_targets_sum_to_100():
+    holdings = default_portfolio()
+    assert holdings["target_weight_pct"].sum() == pytest.approx(95.0)
+    assert holdings["ticker"].is_unique
+
+def test_validation_requires_target_weights_to_sum_to_100():
+    holdings = default_portfolio()
+    assert any("sumar 100%" in error for error in validate_portfolio(holdings, 0))
+
+def test_snapshot_counts_cash_and_positions():
+    holdings = default_portfolio()
+    holdings.loc[holdings["ticker"] == "VT", "quantity"] = 2
+    view, summary = portfolio_snapshot(holdings, 100)
+    assert summary["invested_known_usd"] == pytest.approx(260)
+    assert summary["portfolio_value_known_usd"] == pytest.approx(360)
+    assert len(view) == 13
+
+def test_unknown_asset_with_quantity_marks_valuation_incomplete():
+    holdings = default_portfolio()
+    holdings.loc[0, ["ticker", "quantity"]] = ["NEW", 3]
+    _, summary = portfolio_snapshot(holdings, 0)
+    assert summary["valuation_incomplete"] is True
+
+def test_csv_round_trip():
+    holdings = default_portfolio()
+    text = export_csv(holdings, 125.5)
+    restored, cash = import_csv(text)
+    pd.testing.assert_frame_equal(restored, holdings)
+    assert cash == pytest.approx(125.5)
