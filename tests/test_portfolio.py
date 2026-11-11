@@ -3,14 +3,16 @@ import pytest
 
 from portfolio import default_portfolio, export_csv, import_csv, portfolio_snapshot, validate_portfolio
 
-def test_default_targets_sum_to_100():
+def test_default_targets_plus_cash_sum_to_100():
     holdings = default_portfolio()
     assert holdings["target_weight_pct"].sum() == pytest.approx(95.0)
     assert holdings["ticker"].is_unique
+    assert validate_portfolio(holdings, 0) == []
 
-def test_validation_requires_target_weights_to_sum_to_100():
+def test_validation_rejects_incorrect_target_total():
     holdings = default_portfolio()
-    assert any("sumar 100%" in error for error in validate_portfolio(holdings, 0))
+    holdings.loc[0, "target_weight_pct"] = 19.0
+    assert any("sumar 95%" in error for error in validate_portfolio(holdings, 0))
 
 def test_snapshot_counts_cash_and_positions():
     holdings = default_portfolio()
