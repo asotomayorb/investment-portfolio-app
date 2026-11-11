@@ -88,7 +88,9 @@ st.download_button(
     "Exportar cartera CSV", data=csv_data, file_name="portfolio_backup.csv",
     mime="text/csv", use_container_width=False,
 )
-uploaded = st.file_uploader("Importar respaldo CSV", type=["csv"])
+# Avoid browser-side extension filtering: some Android document providers mark CSV files as non-selectable.
+uploaded = st.file_uploader("Importar respaldo CSV", type=None)
+st.caption("Selecciona el archivo portfolio_backup.csv exportado desde esta aplicación. El contenido se valida antes de guardarse.")
 if uploaded is not None and st.button("Validar e importar CSV"):
     try:
         imported, imported_cash = import_csv(uploaded.getvalue().decode("utf-8-sig"))
