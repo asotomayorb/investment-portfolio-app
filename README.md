@@ -57,7 +57,7 @@ La aplicación se abrirá en el navegador local. La base de datos `portfolio.db`
 2. Ingresa el efectivo disponible en USD.
 3. Pulsa **Guardar cartera**. Los cambios quedan almacenados en SQLite.
 4. Usa **Exportar cartera CSV** para crear un respaldo.
-5. Para recuperar un respaldo, carga el CSV y pulsa **Validar e importar CSV**.
+5. Para recuperar un respaldo, carga el CSV y pulsa **Validar e importar CSV**. En Android, el selector puede mostrar otros tipos de archivo porque se desactivó el filtro por extensión para evitar que algunos proveedores de documentos bloqueen la selección; el contenido se valida como CSV antes de importarlo.
 
 Los pesos objetivo de los instrumentos deben sumar 95%, porque el efectivo mantiene un objetivo fijo de 5%. Las cantidades iniciales son cero: los pesos objetivo no representan posiciones reales.
 
