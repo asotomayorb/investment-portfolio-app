@@ -5,6 +5,7 @@ from io import StringIO
 import pandas as pd
 
 COLUMNS = ["ticker", "name", "asset_type", "quantity", "average_cost", "target_weight_pct"]
+CASH_TARGET_WEIGHT_PCT = 5.0
 
 DEFAULT_HOLDINGS = [
     ("VT", "Vanguard Total World Stock ETF", "ETF", 20.0),
@@ -62,8 +63,12 @@ def validate_portfolio(holdings: pd.DataFrame, cash_usd: float, require_targets_
         errors.append("El efectivo debe ser un número válido.")
     if require_targets_total:
         total = pd.to_numeric(clean["target_weight_pct"], errors="coerce").sum(min_count=1)
-        if pd.notna(total) and abs(float(total) - 100.0) > 0.01:
-            errors.append(f"Los pesos objetivo deben sumar 100% (actual: {total:.2f}%).")
+        expected = 100.0 - CASH_TARGET_WEIGHT_PCT
+        if pd.notna(total) and abs(float(total) - expected) > 0.01:
+            errors.append(
+                f"Los activos deben sumar {expected:.0f}% porque el efectivo tiene un objetivo fijo de "
+                f"{CASH_TARGET_WEIGHT_PCT:.0f}% (actual: {total:.2f}%)."
+            )
     return errors
 
 def portfolio_snapshot(holdings: pd.DataFrame, cash_usd: float) -> tuple[pd.DataFrame, dict]:
@@ -78,13 +83,16 @@ def portfolio_snapshot(holdings: pd.DataFrame, cash_usd: float) -> tuple[pd.Data
     incomplete = bool((~priced & (pd.to_numeric(view["quantity"], errors="coerce").fillna(0) > 0)).any())
     invested_known = float(view["market_value_usd"].fillna(0).sum())
     total_known = invested_known + float(cash_usd)
-    view["actual_weight_pct"] = (view["market_value_usd"] / total_known * 100) if total_known > 0 else 0.0
+    if incomplete:
+        view["actual_weight_pct"] = pd.NA
+    else:
+        view["actual_weight_pct"] = (view["market_value_usd"] / total_known * 100) if total_known > 0 else 0.0
     cash_row = {
         "ticker": "CASH", "name": "Efectivo USD", "asset_type": "Cash",
         "quantity": float(cash_usd), "reference_price": 1.0,
         "market_value_usd": float(cash_usd),
-        "actual_weight_pct": (float(cash_usd) / total_known * 100) if total_known > 0 else 0.0,
-        "target_weight_pct": 5.0, "price_source": "Saldo ingresado por usuario",
+        "actual_weight_pct": (float(cash_usd) / total_known * 100) if total_known > 0 and not incomplete else pd.NA,
+        "target_weight_pct": CASH_TARGET_WEIGHT_PCT, "price_source": "Saldo ingresado por usuario",
     }
     summary = {
         "cash_usd": float(cash_usd),
