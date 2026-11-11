@@ -76,7 +76,8 @@ else:
     st.caption("La valoración usa exclusivamente los precios sintéticos de demostración.")
 
 st.subheader("Asignación actual")
-display = view[["ticker", "name", "quantity", "reference_price", "market_value_usd", "actual_weight_pct", "target_weight_pct", "price_source"]].copy()
+allocation_view = pd.concat([view, pd.DataFrame([summary["cash_row"]])], ignore_index=True)
+display = allocation_view[["ticker", "name", "quantity", "reference_price", "market_value_usd", "actual_weight_pct", "target_weight_pct", "price_source"]].copy()
 display.columns = ["Ticker", "Nombre", "Cantidad", "Precio demo USD", "Valor mercado USD", "Peso actual %", "Objetivo %", "Fuente"]
 st.dataframe(display, use_container_width=True, hide_index=True)
 st.caption("Los porcentajes actuales son aproximados mientras se use el modo demo; no representan datos de mercado.")
