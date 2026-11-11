@@ -8,7 +8,7 @@ Aplicación privada y local para monitorear una cartera de inversión. Esta prim
 - Cartera inicial de 13 instrumentos: VT, SMH, BTCUSD, INDA, MSFT, NVDA, AVGO, GLD, URA, XLE, VHT, PLTR y QQQ.
 - Pesos objetivo iniciales: activos 95% y efectivo 5%. El objetivo de efectivo es fijo en esta etapa.
 - Edición de cantidades, costo promedio, tipo de activo, nombre y pesos objetivo.
-- Cálculo de valor conocido, valor invertido y pesos actuales.
+- Cálculo de valor conocido, valor invertido y pesos actuales, incluyendo el efectivo en la tabla de asignación.
 - Persistencia local en SQLite.
 - Respaldo CSV con importación y exportación.
 - Pruebas automatizadas y workflow CI.
